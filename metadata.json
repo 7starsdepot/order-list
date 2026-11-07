@@ -1,0 +1,8 @@
+{
+  "name": "SupplyFlow - Order Monitoring & Procurement Management",
+  "description": "Centralized supply chain dashboard for tracking procurement stages from stock verification, pricing confirmation, purchasing, to delivery readiness.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

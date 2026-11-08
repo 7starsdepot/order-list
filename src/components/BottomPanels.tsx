@@ -2,7 +2,6 @@ import React from 'react';
 import { 
   Package, 
   ArrowRight, 
-  ShieldAlert, 
   AlertTriangle, 
   Info, 
   CheckCircle2, 
@@ -11,7 +10,13 @@ import {
   Truck,
   FileText,
   Boxes,
-  Bell
+  Bell,
+  ExternalLink,
+  ClipboardList,
+  Store,
+  Tag,
+  Pencil,
+  Globe
 } from 'lucide-react';
 import { SupplyOrder, InventoryItem, SystemAlert } from '../types/order';
 import { formatCurrency } from '../utils/orderUtils';
@@ -22,6 +27,7 @@ interface BottomPanelsProps {
   alerts: SystemAlert[];
   onViewAllInventory?: () => void;
   onViewAllAlerts?: () => void;
+  onEditOrder?: (order: SupplyOrder) => void;
 }
 
 export const BottomPanels: React.FC<BottomPanelsProps> = ({
@@ -30,12 +36,20 @@ export const BottomPanels: React.FC<BottomPanelsProps> = ({
   alerts,
   onViewAllInventory,
   onViewAllAlerts,
+  onEditOrder,
 }) => {
-  // Determine current active step (1 to 4) for the selected order
+  // Determine current active step (1 to 5) for the selected order
   let activeStep = 1;
-  if (selectedOrder.currentStage === 'PRICING') activeStep = 2;
-  if (selectedOrder.currentStage === 'PURCHASING') activeStep = 3;
-  if (selectedOrder.currentStage === 'READY_FOR_DELIVERY' || selectedOrder.currentStage === 'COMPLETED') activeStep = 4;
+  if (selectedOrder.currentStage === 'ORDERS') activeStep = 1;
+  if (selectedOrder.currentStage === 'IDENTIFICATION_OF_STOCKS') activeStep = 2;
+  if (selectedOrder.currentStage === 'PRICING') activeStep = 3;
+  if (selectedOrder.currentStage === 'PURCHASING') activeStep = 4;
+  if (selectedOrder.currentStage === 'READY_FOR_DELIVERY' || selectedOrder.currentStage === 'COMPLETED') activeStep = 5;
+
+  const orderItems = selectedOrder.items || [];
+  const onlineCount = orderItems.filter(it => it.purchaseMethod === 'ONLINE').length;
+  const notOnlineCount = orderItems.filter(it => it.purchaseMethod === 'NOT_ONLINE').length;
+  const branchName = (selectedOrder.depotBranch?.toUpperCase().includes('LIGAO')) ? 'LIGAO Branch' : 'Guinobatan Branch';
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
@@ -109,9 +123,23 @@ export const BottomPanels: React.FC<BottomPanelsProps> = ({
                 Selected Order Details
               </h3>
             </div>
-            <span className="text-[11px] font-mono text-slate-400">
-              {selectedOrder.orderNumber}
-            </span>
+            
+            <div className="flex items-center gap-2">
+              {onEditOrder && (
+                <button
+                  type="button"
+                  onClick={() => onEditOrder(selectedOrder)}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#1D6FEB] hover:bg-blue-600 active:scale-95 text-white font-bold text-[11px] transition cursor-pointer shadow-2xs"
+                  title="Edit customer, items, branch, or stage"
+                >
+                  <Pencil className="w-3 h-3" />
+                  <span>Edit Order</span>
+                </button>
+              )}
+              <span className="text-[11px] font-mono text-slate-400">
+                {selectedOrder.orderNumber}
+              </span>
+            </div>
           </div>
 
           {/* Details Content */}
@@ -136,90 +164,168 @@ export const BottomPanels: React.FC<BottomPanelsProps> = ({
 
               {/* Order Info Breakdown */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <h4 className="font-black text-sm text-slate-900 tracking-tight">
-                    {selectedOrder.orderNumber}
-                  </h4>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#EFF6FF] text-[#1D4ED8] border border-blue-200">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <div className="min-w-0">
+                    <span className="font-mono text-[10px] text-slate-400 block">
+                      {selectedOrder.orderNumber}
+                    </span>
+                    <h4 className="font-black text-sm text-slate-900 tracking-tight truncate">
+                      {selectedOrder.customerName || 'Maria Santos'}
+                    </h4>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#EFF6FF] text-[#1D4ED8] border border-blue-200 shrink-0">
                     {selectedOrder.statusLabel || 'In Progress'}
                   </span>
                 </div>
 
                 <div className="space-y-0.5 text-xs text-slate-600 font-medium">
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Item:</span>
-                    <span className="font-semibold text-slate-800">{selectedOrder.itemName}</span>
+                    <span className="text-slate-400">Department:</span>
+                    <span className="font-semibold text-slate-800 truncate ml-2">
+                      {selectedOrder.department || 'Administrative'}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Qty:</span>
-                    <span className="font-semibold text-slate-800">{selectedOrder.quantityDisplay}</span>
+                    <span className="text-slate-400">Stock Branch:</span>
+                    <span className="font-bold text-cyan-800 bg-cyan-50 px-1.5 py-0.2 rounded border border-cyan-200 truncate ml-2">
+                      {branchName}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Price:</span>
-                    <span className="font-bold text-slate-900">{formatCurrency(selectedOrder.unitPrice)} each</span>
+                    <span className="text-slate-400">Purchasing:</span>
+                    <span className="font-bold truncate ml-2 flex items-center gap-1.5 text-[11px]">
+                      {onlineCount > 0 && (
+                        <span className="text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded border border-purple-200">
+                          🌐 {onlineCount} Online
+                        </span>
+                      )}
+                      {notOnlineCount > 0 && (
+                        <span className="text-amber-800 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">
+                          🏬 {notOnlineCount} In-Store
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Listed Items:</span>
+                    <span className="font-bold text-[#1D6FEB]">
+                      {orderItems.length || 1} Item{(orderItems.length || 1) > 1 ? 's' : ''} ({selectedOrder.quantityDisplay})
+                    </span>
                   </div>
                   <div className="flex justify-between pt-1 border-t border-slate-100 font-bold text-slate-900 text-xs">
-                    <span>Total:</span>
+                    <span>Total Amount:</span>
                     <span className="text-[#1D6FEB]">{formatCurrency(selectedOrder.totalPrice)}</span>
                   </div>
+                </div>
+
+                {/* 7 Stars Depot Connection Badge */}
+                <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                  <span className="text-slate-500 font-medium">Depot Link:</span>
+                  <a
+                    href={selectedOrder.depotUrl || 'https://7starsdepot.netlify.app/'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 font-bold text-cyan-700 hover:text-cyan-800 bg-cyan-50 hover:bg-cyan-100 px-2 py-0.5 rounded-full border border-cyan-200 transition"
+                  >
+                    <span>7starsdepot.netlify.app</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
                 </div>
               </div>
 
             </div>
 
-            {/* 4-Step Visual Stepper at Bottom */}
+            {/* 5-Step Visual Stepper at Bottom */}
             <div className="pt-2 border-t border-slate-100">
-              <div className="flex items-center justify-between relative px-2">
+              <div className="flex items-center justify-between relative px-1 sm:px-2">
                 
                 {/* Connecting Line */}
-                <div className="absolute top-3.5 left-6 right-6 h-0.5 bg-slate-200 -z-0" />
+                <div className="absolute top-3.5 left-5 right-5 h-0.5 bg-slate-200 -z-0" />
                 
-                {/* Step 1: Stocks Available */}
+                {/* Step 1: Orders */}
                 <div className="flex flex-col items-center relative z-10 text-center">
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white shadow-xs ${
-                    activeStep >= 1 ? 'bg-[#10B981]' : 'bg-slate-300'
+                    activeStep >= 1 ? 'bg-[#1D6FEB]' : 'bg-slate-300'
                   }`}>
-                    <Check className="w-4 h-4 stroke-[3]" />
+                    {activeStep > 1 ? (
+                      <Check className="w-4 h-4 stroke-[3]" />
+                    ) : (
+                      <ClipboardList className="w-3.5 h-3.5" />
+                    )}
                   </div>
-                  <span className="text-[10px] font-bold text-slate-700 mt-1">Stocks Available</span>
+                  <span className={`text-[9px] sm:text-[10px] font-bold mt-1 ${activeStep === 1 ? 'text-blue-700' : 'text-slate-700'}`}>
+                    Orders
+                  </span>
                 </div>
 
-                {/* Step 2: Pricing */}
+                {/* Step 2: Identification of Stocks */}
                 <div className="flex flex-col items-center relative z-10 text-center">
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white shadow-xs ${
-                    activeStep >= 2 ? 'bg-[#10B981]' : 'bg-slate-300'
+                    activeStep >= 2 ? (activeStep === 2 ? 'bg-[#0891B2] ring-4 ring-cyan-100' : 'bg-[#10B981]') : 'bg-slate-300'
                   }`}>
-                    {activeStep >= 2 ? (
+                    {activeStep > 2 ? (
                       <Check className="w-4 h-4 stroke-[3]" />
+                    ) : activeStep === 2 ? (
+                      <Package className="w-3.5 h-3.5 text-white" />
                     ) : (
                       <span className="text-xs font-bold text-slate-500">2</span>
                     )}
                   </div>
-                  <span className="text-[10px] font-bold text-slate-700 mt-1">Pricing</span>
+                  <span className={`text-[9px] sm:text-[10px] font-bold mt-1 ${activeStep === 2 ? 'text-cyan-700' : 'text-slate-700'}`}>
+                    Stock ID
+                  </span>
                 </div>
 
-                {/* Step 3: Purchasing */}
-                <div className="flex flex-col items-center relative z-10 text-center">
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white shadow-xs ring-4 ring-blue-100 ${
-                    activeStep >= 3 ? 'bg-[#1D6FEB]' : 'bg-slate-300'
-                  }`}>
-                    <ShoppingCart className="w-3.5 h-3.5 text-white" />
-                  </div>
-                  <span className="text-[10px] font-bold text-blue-700 mt-1">Purchasing</span>
-                </div>
-
-                {/* Step 4: Delivery */}
+                {/* Step 3: Pricing */}
                 <div className="flex flex-col items-center relative z-10 text-center">
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white shadow-xs ${
-                    activeStep >= 4 ? 'bg-[#10B981]' : 'bg-slate-300'
+                    activeStep >= 3 ? (activeStep === 3 ? 'bg-[#10B981] ring-4 ring-emerald-100' : 'bg-[#10B981]') : 'bg-slate-300'
                   }`}>
-                    {activeStep >= 4 ? (
+                    {activeStep > 3 ? (
+                      <Check className="w-4 h-4 stroke-[3]" />
+                    ) : activeStep === 3 ? (
+                      <Tag className="w-3.5 h-3.5 text-white" />
+                    ) : (
+                      <span className="text-xs font-bold text-slate-500">3</span>
+                    )}
+                  </div>
+                  <span className={`text-[9px] sm:text-[10px] font-bold mt-1 ${activeStep === 3 ? 'text-emerald-700' : 'text-slate-700'}`}>
+                    Pricing
+                  </span>
+                </div>
+
+                {/* Step 4: Purchasing */}
+                <div className="flex flex-col items-center relative z-10 text-center">
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white shadow-xs ${
+                    activeStep >= 4 ? (activeStep === 4 ? 'bg-[#EA580C] ring-4 ring-orange-100' : 'bg-[#10B981]') : 'bg-slate-300'
+                  }`}>
+                    {activeStep > 4 ? (
+                      <Check className="w-4 h-4 stroke-[3]" />
+                    ) : activeStep === 4 ? (
+                      <ShoppingCart className="w-3.5 h-3.5 text-white" />
+                    ) : (
+                      <span className="text-xs font-bold text-slate-500">4</span>
+                    )}
+                  </div>
+                  <span className={`text-[9px] sm:text-[10px] font-bold mt-1 ${activeStep === 4 ? 'text-orange-700' : 'text-slate-700'}`}>
+                    Purchasing
+                  </span>
+                </div>
+
+                {/* Step 5: Delivery */}
+                <div className="flex flex-col items-center relative z-10 text-center">
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white shadow-xs ${
+                    activeStep >= 5 ? 'bg-[#8B5CF6] ring-4 ring-purple-100' : 'bg-slate-300'
+                  }`}>
+                    {activeStep >= 5 ? (
                       <Check className="w-4 h-4 stroke-[3]" />
                     ) : (
                       <Truck className="w-3.5 h-3.5 text-slate-500" />
                     )}
                   </div>
-                  <span className="text-[10px] font-bold text-slate-400 mt-1">Delivery</span>
+                  <span className={`text-[9px] sm:text-[10px] font-bold mt-1 ${activeStep >= 5 ? 'text-purple-700' : 'text-slate-400'}`}>
+                    Delivery
+                  </span>
                 </div>
 
               </div>

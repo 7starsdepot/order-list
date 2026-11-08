@@ -4,13 +4,18 @@
  */
 
 export type OrderStage = 
-  | 'STOCKS_AVAILABLE'
+  | 'ORDERS'
+  | 'IDENTIFICATION_OF_STOCKS'
   | 'PRICING'
   | 'PURCHASING'
   | 'READY_FOR_DELIVERY'
   | 'COMPLETED';
 
 export type CardBadgeType = 
+  | 'New Order'
+  | 'Pending Intake'
+  | 'Stock Identified'
+  | 'Depot Matched'
   | 'In Stock'
   | 'Review Price'
   | 'Pending Price'
@@ -19,22 +24,32 @@ export type CardBadgeType =
   | 'Ready'
   | 'Completed';
 
+export type PurchaseMethod = 'ONLINE' | 'NOT_ONLINE';
+export type DepotBranchType = 'GBTN' | 'LIGAO' | 'Guinobatan Branch' | 'Ligao Branch';
+
 export interface OrderItem {
   id: string;
-  sku: string;
+  sku?: string;
   name: string;
   genericName?: string;
   quantityRequested: number;
   unit: string;
   unitPrice: number; // in PHP (₱)
+  totalPrice?: number;
   warehouseLocation?: string;
+  depotBranch?: DepotBranchType | string;
+  purchaseMethod?: PurchaseMethod; // 'ONLINE' = Bought Online, 'NOT_ONLINE' = In-Store / Walk-in
+  stockStatus?: string;
   imageUrl?: string;
 }
 
 export interface SupplyOrder {
   id: string;
   orderNumber: string; // e.g., "SO-2025-0018"
-  itemName: string; // e.g., "Laptop Paper"
+  customerName: string; // e.g., "Maria Santos"
+  customerRole?: string; // e.g., "Administrative Officer"
+  customerEmail?: string;
+  itemName: string; // primary item summary e.g. "Laptop Paper (Continuous Form)"
   quantityDisplay: string; // e.g., "Qty: 50 pcs"
   quantity: number;
   unit: string; // e.g., "pcs", "reams", "boxes"
@@ -48,6 +63,12 @@ export interface SupplyOrder {
   imageUrl?: string;
   description?: string;
   department?: string;
+  depotUrl?: string; // e.g., "https://7starsdepot.netlify.app/"
+  depotBranch?: DepotBranchType | string; // 'GBTN' | 'LIGAO'
+  purchaseMethod?: PurchaseMethod | 'MIXED'; // 'ONLINE' | 'NOT_ONLINE' | 'MIXED'
+  completedAt?: string; // e.g., "2025-11-09T14:30:00Z"
+  deliveryNotes?: string; // e.g., "Delivered to Admin Bldg Room 204"
+  items?: OrderItem[]; // List of all items included in this customer's order
 }
 
 export interface InventoryItem {

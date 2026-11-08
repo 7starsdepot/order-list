@@ -2,6 +2,7 @@ import React from 'react';
 import { 
   ShoppingCart, 
   Home, 
+  History,
   Package, 
   ClipboardList, 
   ShoppingBag, 
@@ -15,11 +16,13 @@ import {
 interface SidebarProps {
   currentTab: string;
   onSelectTab: (tab: string) => void;
+  completedCount?: number;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab, completedCount }) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
+    { id: 'history', label: 'Order History', icon: History, badge: completedCount },
     { id: 'inventory', label: 'Inventory', icon: Package },
     { id: 'orders', label: 'Orders', icon: ClipboardList },
     { id: 'purchases', label: 'Purchases', icon: ShoppingBag },
@@ -39,12 +42,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
             </div>
           </div>
           <h1 className="text-base font-bold text-white tracking-tight leading-snug">
-            Supply Order
+            7stars Order
             <br />
-            Monitoring System
+            Monitoring Board
           </h1>
-          <p className="text-[11px] text-slate-400 font-medium mt-1 tracking-wider uppercase">
-            Track • Monitor • Deliver
+          <p className="text-[10px] text-sky-400 font-semibold mt-1 tracking-wider uppercase">
+            7starsdepot.netlify.app
           </p>
         </div>
 
@@ -58,14 +61,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onSelectTab }) => 
               <button
                 key={item.id}
                 onClick={() => onSelectTab(item.id)}
-                className={`w-full flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                   isActive
                     ? 'bg-[#1D6FEB] text-white shadow-md shadow-blue-600/30 font-bold'
                     : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                <span>{item.label}</span>
+                <div className="flex items-center gap-3.5">
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                  <span>{item.label}</span>
+                </div>
+                {item.badge !== undefined && item.badge > 0 && (
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    isActive ? 'bg-white/20 text-white' : 'bg-slate-800 text-sky-400 border border-slate-700'
+                  }`}>
+                    {item.badge}
+                  </span>
+                )}
               </button>
             );
           })}

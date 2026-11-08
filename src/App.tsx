@@ -157,7 +157,7 @@ export default function App() {
         };
       })
     );
-    showToast(`Order assigned to ${branch === 'LIGAO' ? 'LIGAO Branch' : 'GBTN (Guinobatan Branch)'}`);
+    showToast(`Order assigned to ${branch === 'LIGAO' ? 'Ligao Branch' : 'Guinobatan Branch'}`);
   };
 
   // Quick toggle between Online and Not Online for an item in Purchasing

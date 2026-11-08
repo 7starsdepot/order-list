@@ -32,8 +32,6 @@ export const EditOrderModal: React.FC<EditOrderModalProps> = ({
   onSaveOrder,
 }) => {
   const [customerName, setCustomerName] = useState('');
-  const [customerRole, setCustomerRole] = useState('');
-  const [department, setDepartment] = useState('');
   const [currentStage, setCurrentStage] = useState<OrderStage>('ORDERS');
   const [depotBranch, setDepotBranch] = useState<'GBTN' | 'LIGAO'>('GBTN');
   const [statusLabel, setStatusLabel] = useState('');
@@ -43,8 +41,6 @@ export const EditOrderModal: React.FC<EditOrderModalProps> = ({
   useEffect(() => {
     if (order) {
       setCustomerName(order.customerName || '');
-      setCustomerRole(order.customerRole || '');
-      setDepartment(order.department || 'Administrative');
       setCurrentStage(order.currentStage || 'ORDERS');
       setDepotBranch(normalizeBranch(order.depotBranch));
       setStatusLabel(order.statusLabel || order.badgeText || 'In Progress');
@@ -153,8 +149,8 @@ export const EditOrderModal: React.FC<EditOrderModalProps> = ({
     const updatedOrder: SupplyOrder = {
       ...order,
       customerName: customerName.trim(),
-      customerRole: customerRole.trim() || undefined,
-      department: department.trim() || undefined,
+      customerRole: undefined,
+      department: undefined,
       currentStage,
       depotBranch,
       statusLabel: statusLabel.trim() || 'In Progress',
@@ -214,53 +210,25 @@ export const EditOrderModal: React.FC<EditOrderModalProps> = ({
         {/* Form Body (Scrollable) */}
         <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1 text-xs text-slate-700">
           
-          {/* Section 1: Customer & Department Info */}
+          {/* Section 1: Customer Information */}
           <div className="bg-slate-50/80 p-4 rounded-xl border border-slate-200/80 space-y-3">
             <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
               <User className="w-3.5 h-3.5 text-[#1D6FEB]" />
-              Customer & Department Information
+              Customer Information
             </h4>
             
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Customer Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  placeholder="e.g. Maria Santos"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1D6FEB] bg-white font-medium text-xs"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Customer Role / Designation
-                </label>
-                <input
-                  type="text"
-                  value={customerRole}
-                  onChange={(e) => setCustomerRole(e.target.value)}
-                  placeholder="e.g. Administrative Officer"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1D6FEB] bg-white font-medium text-xs"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                  Department / Office
-                </label>
-                <input
-                  type="text"
-                  value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
-                  placeholder="e.g. SNED Resource Center"
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1D6FEB] bg-white font-medium text-xs"
-                />
-              </div>
+            <div>
+              <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                Customer Name *
+              </label>
+              <input
+                type="text"
+                required
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+                placeholder="e.g. Greenfield ES, Maria Santos"
+                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1D6FEB] bg-white font-medium text-xs"
+              />
             </div>
           </div>
 
@@ -318,7 +286,7 @@ export const EditOrderModal: React.FC<EditOrderModalProps> = ({
                   }`}
                 >
                   <Store className="w-3.5 h-3.5" />
-                  <span>GBTN (Guinobatan Branch)</span>
+                  <span>Guinobatan Branch</span>
                   {depotBranch === 'GBTN' && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                 </button>
 

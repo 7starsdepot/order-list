@@ -180,12 +180,6 @@ export const BottomPanels: React.FC<BottomPanelsProps> = ({
 
                 <div className="space-y-0.5 text-xs text-slate-600 font-medium">
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Department:</span>
-                    <span className="font-semibold text-slate-800 truncate ml-2">
-                      {selectedOrder.department || 'Administrative'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
                     <span className="text-slate-400">Stock Branch:</span>
                     <span className="font-bold text-cyan-800 bg-cyan-50 px-1.5 py-0.2 rounded border border-cyan-200 truncate ml-2">
                       {branchName}

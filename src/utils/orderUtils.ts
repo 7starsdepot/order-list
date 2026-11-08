@@ -203,7 +203,7 @@ export function normalizeBranch(branch?: string): 'GBTN' | 'LIGAO' {
 
 export function getBranchLabel(branch?: string): string {
   const norm = normalizeBranch(branch);
-  return norm === 'LIGAO' ? 'LIGAO Branch' : 'GBTN (Guinobatan Branch)';
+  return norm === 'LIGAO' ? 'Ligao Branch' : 'Guinobatan Branch';
 }
 
 export function computeOrderPurchaseMethod(items?: any[]): 'ONLINE' | 'NOT_ONLINE' | 'MIXED' {

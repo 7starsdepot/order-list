@@ -16,13 +16,11 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
   onCreateOrder,
   nextOrderIndex,
 }) => {
-  const [customerName, setCustomerName] = useState('Maria Santos');
-  const [customerRole, setCustomerRole] = useState('Administrative Officer');
+  const [customerName, setCustomerName] = useState('Greenfield ES');
   const [itemName, setItemName] = useState('');
   const [quantity, setQuantity] = useState<number>(10);
   const [unit, setUnit] = useState('pcs');
   const [unitPrice, setUnitPrice] = useState<number>(150);
-  const [department, setDepartment] = useState('SNED Resource Center');
   const [targetStage, setTargetStage] = useState<OrderStage>('ORDERS');
   const [depotBranch, setDepotBranch] = useState<'GBTN' | 'LIGAO'>('GBTN');
   const [purchaseMethod, setPurchaseMethod] = useState<'ONLINE' | 'NOT_ONLINE'>('ONLINE');
@@ -59,7 +57,6 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
       id: orderId,
       orderNumber,
       customerName: customerName.trim() || 'Procurement Customer',
-      customerRole,
       itemName: itemName.trim(),
       quantityDisplay: `Qty: ${quantity} ${unit}`,
       quantity,
@@ -69,7 +66,6 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
       badgeText,
       currentStage: targetStage,
       statusLabel,
-      department,
       depotBranch,
       purchaseMethod,
       createdAt: new Date().toISOString(),
@@ -205,20 +201,6 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
             </div>
           </div>
 
-          <div>
-            <label className="block font-bold text-slate-800 mb-1">Requesting Department</label>
-            <div className="relative">
-              <Building className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-              <input
-                type="text"
-                value={department}
-                onChange={(e) => setDepartment(e.target.value)}
-                placeholder="e.g. SNED Resource Center, Admin Division"
-                className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 focus:border-[#1D6FEB] focus:ring-2 focus:ring-blue-100 outline-none text-xs font-semibold"
-              />
-            </div>
-          </div>
-
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block font-bold text-slate-800 mb-1">Depot Branch</label>
@@ -227,8 +209,8 @@ export const CreateOrderModal: React.FC<CreateOrderModalProps> = ({
                 onChange={(e) => setDepotBranch(e.target.value as 'GBTN' | 'LIGAO')}
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:border-[#1D6FEB] outline-none text-xs font-semibold bg-white"
               >
-                <option value="GBTN">GBTN (Guinobatan Branch)</option>
-                <option value="LIGAO">LIGAO Branch</option>
+                <option value="GBTN">Guinobatan Branch</option>
+                <option value="LIGAO">Ligao Branch</option>
               </select>
             </div>
             <div>

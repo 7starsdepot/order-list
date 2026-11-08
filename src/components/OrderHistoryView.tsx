@@ -21,7 +21,7 @@ import {
   FileCheck
 } from 'lucide-react';
 import { SupplyOrder } from '../types/order';
-import { formatCurrency } from '../utils/orderUtils';
+import { formatCurrency, normalizeBranch } from '../utils/orderUtils';
 
 interface OrderHistoryViewProps {
   orders: SupplyOrder[];
@@ -37,7 +37,7 @@ export const OrderHistoryView: React.FC<OrderHistoryViewProps> = ({
   onReorder,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDepartment, setSelectedDepartment] = useState('ALL');
+  const [selectedBranch, setSelectedBranch] = useState<'ALL' | 'GBTN' | 'LIGAO'>('ALL');
   const [dateFilter, setDateFilter] = useState<'ALL' | '7DAYS' | '30DAYS'>('ALL');
   const [sortBy, setSortBy] = useState<'NEWEST' | 'OLDEST' | 'PRICE_DESC' | 'PRICE_ASC'>('NEWEST');
   const [selectedReceiptOrder, setSelectedReceiptOrder] = useState<SupplyOrder | null>(null);
@@ -46,15 +46,6 @@ export const OrderHistoryView: React.FC<OrderHistoryViewProps> = ({
   const completedOrders = useMemo(() => {
     return orders.filter((o) => o.currentStage === 'COMPLETED');
   }, [orders]);
-
-  // Extract distinct departments from completed orders
-  const departments = useMemo(() => {
-    const deps = new Set<string>();
-    completedOrders.forEach((o) => {
-      if (o.department) deps.add(o.department);
-    });
-    return Array.from(deps);
-  }, [completedOrders]);
 
   // Filter & sort logic
   const filteredOrders = useMemo(() => {
@@ -67,13 +58,12 @@ export const OrderHistoryView: React.FC<OrderHistoryViewProps> = ({
           (order.customerName && order.customerName.toLowerCase().includes(query)) ||
           order.orderNumber.toLowerCase().includes(query) ||
           order.itemName.toLowerCase().includes(query) ||
-          (order.department && order.department.toLowerCase().includes(query)) ||
           (order.depotBranch && order.depotBranch.toLowerCase().includes(query)) ||
           (order.deliveryNotes && order.deliveryNotes.toLowerCase().includes(query));
 
-        // Department filter
-        const matchesDepartment = 
-          selectedDepartment === 'ALL' || order.department === selectedDepartment;
+        // Branch filter
+        const matchesBranch = 
+          selectedBranch === 'ALL' || normalizeBranch(order.depotBranch) === selectedBranch;
 
         // Date filter
         let matchesDate = true;
@@ -85,7 +75,7 @@ export const OrderHistoryView: React.FC<OrderHistoryViewProps> = ({
           if (dateFilter === '30DAYS') matchesDate = diffDays <= 30;
         }
 
-        return matchesQuery && matchesDepartment && matchesDate;
+        return matchesQuery && matchesBranch && matchesDate;
       })
       .sort((a, b) => {
         if (sortBy === 'NEWEST') {
@@ -106,7 +96,7 @@ export const OrderHistoryView: React.FC<OrderHistoryViewProps> = ({
         }
         return 0;
       });
-  }, [completedOrders, searchTerm, selectedDepartment, dateFilter, sortBy]);
+  }, [completedOrders, searchTerm, selectedBranch, dateFilter, sortBy]);
 
   // Aggregated KPI Stats
   const totalCompletedValue = useMemo(() => {
@@ -167,7 +157,6 @@ export const OrderHistoryView: React.FC<OrderHistoryViewProps> = ({
       'Total Price (PHP)',
       'Final Status',
       'Completed Timestamp',
-      'Department',
       'Depot Branch'
     ];
 
@@ -181,8 +170,7 @@ export const OrderHistoryView: React.FC<OrderHistoryViewProps> = ({
       o.totalPrice,
       `"${o.statusLabel || 'Delivered'}"`,
       `"${o.completedAt || o.updatedAt}"`,
-      `"${o.department || 'General'}"`,
-      `"${o.depotBranch || '7 Stars Depot'}"`
+      `"${normalizeBranch(o.depotBranch) === 'LIGAO' ? 'Ligao Branch' : 'Guinobatan Branch'}"`
     ]);
 
     const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
@@ -365,18 +353,17 @@ export const OrderHistoryView: React.FC<OrderHistoryViewProps> = ({
           {/* Filters & Sorters */}
           <div className="flex flex-wrap items-center gap-2.5">
             
-            {/* Department Dropdown */}
+            {/* Branch Dropdown */}
             <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-2xs">
-              <Building className="w-3.5 h-3.5 text-slate-400" />
+              <Store className="w-3.5 h-3.5 text-slate-400" />
               <select
-                value={selectedDepartment}
-                onChange={(e) => setSelectedDepartment(e.target.value)}
+                value={selectedBranch}
+                onChange={(e) => setSelectedBranch(e.target.value as any)}
                 className="bg-transparent font-semibold text-slate-700 outline-none cursor-pointer text-xs"
               >
-                <option value="ALL">All Departments</option>
-                {departments.map((dep) => (
-                  <option key={dep} value={dep}>{dep}</option>
-                ))}
+                <option value="ALL">All Branches</option>
+                <option value="GBTN">Guinobatan Branch</option>
+                <option value="LIGAO">Ligao Branch</option>
               </select>
             </div>
 
@@ -410,11 +397,11 @@ export const OrderHistoryView: React.FC<OrderHistoryViewProps> = ({
             </div>
 
             {/* Reset Filters button if any active */}
-            {(searchTerm || selectedDepartment !== 'ALL' || dateFilter !== 'ALL' || sortBy !== 'NEWEST') && (
+            {(searchTerm || selectedBranch !== 'ALL' || dateFilter !== 'ALL' || sortBy !== 'NEWEST') && (
               <button
                 onClick={() => {
                   setSearchTerm('');
-                  setSelectedDepartment('ALL');
+                  setSelectedBranch('ALL');
                   setDateFilter('ALL');
                   setSortBy('NEWEST');
                 }}
@@ -437,7 +424,7 @@ export const OrderHistoryView: React.FC<OrderHistoryViewProps> = ({
               </div>
               <h3 className="font-bold text-slate-800 text-sm">No completed orders found</h3>
               <p className="text-xs text-slate-500 max-w-sm mt-1">
-                {searchTerm || selectedDepartment !== 'ALL' || dateFilter !== 'ALL'
+                {searchTerm || selectedBranch !== 'ALL' || dateFilter !== 'ALL'
                   ? 'No completed orders matched your selected filter criteria. Try resetting your search filters.'
                   : 'Orders that reach the "Order Completed!" checkpoint will be logged into this archive with their final status and timestamp.'}
               </p>
@@ -448,7 +435,7 @@ export const OrderHistoryView: React.FC<OrderHistoryViewProps> = ({
                 <tr className="bg-slate-100/70 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
                   <th className="py-3 px-4">Order Number</th>
                   <th className="py-3 px-4">Supply Item & Details</th>
-                  <th className="py-3 px-4">Department</th>
+                  <th className="py-3 px-4">Depot Branch</th>
                   <th className="py-3 px-4">Total Amount (₱)</th>
                   <th className="py-3 px-4">Final Status</th>
                   <th className="py-3 px-4">Completed Timestamp</th>
@@ -485,24 +472,15 @@ export const OrderHistoryView: React.FC<OrderHistoryViewProps> = ({
                             <span>{order.quantityDisplay}</span>
                             <span>•</span>
                             <span>{formatCurrency(order.unitPrice)} each</span>
-                            {order.depotBranch && (
-                              <>
-                                <span>•</span>
-                                <span className="inline-flex items-center gap-0.5 text-cyan-700 font-semibold">
-                                  <Store className="w-3 h-3 text-cyan-600" />
-                                  <span>{order.depotBranch}</span>
-                                </span>
-                              </>
-                            )}
                           </div>
                         </div>
                       </td>
 
-                      {/* Department */}
-                      <td className="py-3.5 px-4 text-slate-700 font-medium">
-                        <span className="inline-flex items-center gap-1.5">
-                          <Building className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span>{order.department || 'Administrative'}</span>
+                      {/* Depot Branch */}
+                      <td className="py-3.5 px-4 text-slate-700 font-medium whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-cyan-50 text-cyan-800 border border-cyan-200">
+                          <Store className="w-3.5 h-3.5 text-cyan-600 shrink-0" />
+                          <span>{normalizeBranch(order.depotBranch) === 'LIGAO' ? 'Ligao Branch' : 'Guinobatan Branch'}</span>
                         </span>
                       </td>
 
@@ -634,12 +612,8 @@ export const OrderHistoryView: React.FC<OrderHistoryViewProps> = ({
                     <span className="font-bold text-slate-800">{formatCurrency(selectedReceiptOrder.unitPrice)} each</span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block">Department:</span>
-                    <span className="font-bold text-slate-800">{selectedReceiptOrder.department || 'Administrative'}</span>
-                  </div>
-                  <div>
                     <span className="text-slate-400 block">Depot Branch:</span>
-                    <span className="font-bold text-cyan-800">{selectedReceiptOrder.depotBranch || '7 Stars Depot'}</span>
+                    <span className="font-bold text-cyan-800">{normalizeBranch(selectedReceiptOrder.depotBranch) === 'LIGAO' ? 'Ligao Branch' : 'Guinobatan Branch'}</span>
                   </div>
                 </div>
 

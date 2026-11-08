@@ -508,7 +508,7 @@ export const OrderProcessingFlow: React.FC<OrderProcessingFlowProps> = ({
                         : 'text-slate-600 hover:text-cyan-800'
                     }`}
                   >
-                    GBTN ({gbtnOrders.length})
+                    Guinobatan ({gbtnOrders.length})
                   </button>
                   <button
                     type="button"
@@ -519,7 +519,7 @@ export const OrderProcessingFlow: React.FC<OrderProcessingFlowProps> = ({
                         : 'text-slate-600 hover:text-cyan-800'
                     }`}
                   >
-                    LIGAO ({ligaoOrders.length})
+                    Ligao ({ligaoOrders.length})
                   </button>
                 </div>
               </div>
@@ -543,7 +543,7 @@ export const OrderProcessingFlow: React.FC<OrderProcessingFlowProps> = ({
                     <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-cyan-100">
                       <div className="flex items-center gap-1.5 text-xs font-black text-cyan-900">
                         <Store className="w-3.5 h-3.5 text-cyan-600" />
-                        <span>GBTN (Guinobatan Branch)</span>
+                        <span>Guinobatan Branch</span>
                       </div>
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-cyan-100 text-cyan-800 border border-cyan-200">
                         {gbtnOrders.length} Order{gbtnOrders.length === 1 ? '' : 's'}
@@ -554,7 +554,7 @@ export const OrderProcessingFlow: React.FC<OrderProcessingFlowProps> = ({
                     <div className="space-y-2">
                       {gbtnOrders.length === 0 ? (
                         <div className="text-center py-3 text-[11px] text-slate-400 font-medium italic border border-dashed border-cyan-200 rounded-lg">
-                          Drop here to assign to GBTN
+                          Drop here to assign to Guinobatan Branch
                         </div>
                       ) : (
                         gbtnOrders.map((order) => renderCard(order, draggedOrderId === order.id))
@@ -602,7 +602,7 @@ export const OrderProcessingFlow: React.FC<OrderProcessingFlowProps> = ({
                 {/* Drop indicator if hovering general column */}
                 {dragOverColumn === 'IDENTIFICATION_OF_STOCKS' && draggedOrder && draggedOrder.currentStage !== 'IDENTIFICATION_OF_STOCKS' && (
                   <div className="border-2 border-dashed border-[#0891B2] bg-white/90 rounded-xl p-3 text-center text-xs font-bold text-[#0891B2] animate-pulse">
-                    Drop into GBTN or LIGAO Sub-Lane
+                    Drop into Guinobatan or Ligao Sub-Lane
                   </div>
                 )}
 
@@ -875,9 +875,6 @@ export const OrderProcessingFlow: React.FC<OrderProcessingFlowProps> = ({
                       {itemsModalOrder.orderNumber}
                     </span>
                   </div>
-                  <span className="text-[10px] text-slate-400">
-                    {itemsModalOrder.department || 'Administrative'} • {itemsModalOrder.customerRole || 'Procurement Requestor'}
-                  </span>
                 </div>
               </div>
 
